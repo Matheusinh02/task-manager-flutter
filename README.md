@@ -617,4 +617,3 @@ Abra uma [issue](https://github.com/Matheusinh02/task-manager-flutter/issues) no
 
 ---
 
-**Desenvolvido com ❤️ usando Flutter e Node.js**
