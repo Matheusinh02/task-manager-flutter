@@ -615,5 +615,4 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 Encontrou um bug? Tem uma sugestão?  
 Abra uma [issue](https://github.com/Matheusinh02/task-manager-flutter/issues) no GitHub!
 
----
 
