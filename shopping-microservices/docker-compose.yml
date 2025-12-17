@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # RabbitMQ com Management UI
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: shopping-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopping-network
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+  # List Service (Producer)
+  list-service:
+    build: ./services/list-service
+    container_name: list-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+  # Item Service
+  item-service:
+    build: ./services/item-service
+    container_name: item-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+  # Notification Service (Consumer A)
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    environment:
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+  # Analytics Service (Consumer B)
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    environment:
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+    depends_on:
+      - user-service
+      - list-service
+      - item-service
+    networks:
+      - shopping-network
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
+
+networks:
+  shopping-network:
+    driver: bridge

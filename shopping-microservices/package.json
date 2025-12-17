@@ -1,0 +1,22 @@
+{
+  "name": "shopping-microservices",
+  "version": "1.0.0",
+  "description": "Sistema de microsserviços com RabbitMQ para Lista de Compras",
+  "private": true,
+  "workspaces": [
+    "services/*"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd services/user-service && npm install && cd ../list-service && npm install && cd ../item-service && npm install && cd ../notification-service && npm install && cd ../analytics-service && npm install && cd ../api-gateway && npm install",
+    "dev:all": "concurrently \"npm run dev:user\" \"npm run dev:list\" \"npm run dev:item\" \"npm run dev:notification\" \"npm run dev:analytics\" \"npm run dev:gateway\"",
+    "dev:user": "cd services/user-service && npm run dev",
+    "dev:list": "cd services/list-service && npm run dev",
+    "dev:item": "cd services/item-service && npm run dev",
+    "dev:notification": "cd services/notification-service && npm run dev",
+    "dev:analytics": "cd services/analytics-service && npm run dev",
+    "dev:gateway": "cd services/api-gateway && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
